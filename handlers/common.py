@@ -1,7 +1,7 @@
 from typing import Final
 
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, Message, Contact
+from aiogram.types import CallbackQuery, Message, Contact, FSInputFile
 from aiogram.filters import Command, CommandStart
 
 from keyboards.inline import instructions_kb, start_kb
@@ -24,8 +24,9 @@ ABOUT_TEXT: Final[str] = (
 
 @router.message(CommandStart())
 async def start(message: Message) -> None:
-    await message.answer(
-        "👋 Привет! Это бот-помощник.\n\nВы можете открыть инструкции через кнопки ниже:",
+    await message.answer_photo(
+        photo=FSInputFile("images/start.jpg"),
+        caption="👋 Привет! Это бот-помощник.\n\nВы можете открыть инструкции через кнопки ниже:",
         reply_markup=start_kb(),
     )
 
@@ -71,6 +72,7 @@ async def to_sent_contact_support(callback: CallbackQuery) -> None:
         first_name="Вася",
         last_name="Пупкин",
         vcard="BEGIN:VCARD\nVERSION:3.0\nFN:Вася Пупкин\nTEL:+79999999999\nEND:VCARD",
+        disable_notification=True,
     )
     await callback.answer()
 

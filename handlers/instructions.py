@@ -1,5 +1,4 @@
 import logging
-from functools import lru_cache
 
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
@@ -19,23 +18,20 @@ async def _load_cache() -> None:
     await cache.load()
 
 
-@lru_cache
-async def _load_instructions(key: str) -> str:
-    return INSTRUCTIONS.get(key, "Инструкция не найдена.")
-
-
 async def _send_instruction_text_then_photos(callback: CallbackQuery, key: str) -> None:
 
-    text = await _load_instructions(key)
-    await callback.message.answer(text)
+    # text = INSTRUCTIONS.get(key, "Инструкция не найдена.")
+    # await callback.message.answer(text)
 
-    for item in IMAGES.get(key, []):
+    for item in IMAGES.get(key):
         src = item["src"]
         caption = item.get("caption", "")
 
         media = await cache.resolve(src)
         try:
-            msg = await callback.message.answer_photo(media, caption=caption)
+            msg = await callback.message.answer_photo(
+                media, caption=caption, disable_notification=True
+            )
             await cache.remember_from_message(src, msg)
         except Exception as e:
             log.exception("Failed to send photo: %s | Error: %s", src, e)

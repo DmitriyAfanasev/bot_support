@@ -1,7 +1,13 @@
 import logging
+from pathlib import Path
 
 from pydantic import BaseModel, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+BASE_DIR = Path(__file__).resolve().parent
+
+PATH_TO_IMAGES = BASE_DIR / "images"
 
 
 class LoggingSettings(BaseModel):
@@ -22,7 +28,10 @@ class Settings(BaseSettings):
     bot_token: SecretStr
     logging: LoggingSettings = LoggingSettings()
 
-    support_url: str = "https://t.me/@Sheldon_Kuper1"
+    support_url: str
+    support_phone: str
+    support_first_name: str
+    support_last_name: str
 
 
 settings = Settings()

@@ -1,38 +1,40 @@
 import logging
 
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto
 
 from keyboards.inline import back_to_menu_kb
-from texts import INSTRUCTIONS, IMAGES
-from photo_cache import PhotoCache
-
-cache = PhotoCache("data/photo_cache.json")
+from texts import IMAGES
 
 router = Router(name=__name__)
 log = logging.getLogger(__name__)
 
 
-@router.startup()
-async def _load_cache() -> None:
-    await cache.load()
-
-
-async def _send_instruction_text_then_photos(callback: CallbackQuery, key: str) -> None:
-
-    # text = INSTRUCTIONS.get(key, "Инструкция не найдена.")
-    # await callback.message.answer(text)
-
-    for item in IMAGES.get(key):
-        src = item["src"]
+async def _send_instruction_text_then_photos(
+    callback: CallbackQuery,
+    text_in_button: str,
+) -> None:
+    for item in IMAGES.get(text_in_button):
+        text = item.get("text", "")
+        src = item.get("src", "")
+        src2 = item.get("src2", "")
         caption = item.get("caption", "")
-
-        media = await cache.resolve(src)
         try:
-            msg = await callback.message.answer_photo(
-                media, caption=caption, disable_notification=True
-            )
-            await cache.remember_from_message(src, msg)
+            if text:
+                await callback.message.answer(text=text, disable_notification=True)
+            if src and not src2:
+                await callback.message.answer_photo(
+                    FSInputFile(src), caption=caption, disable_notification=True
+                )
+            if src and src2:
+                media = [
+                    InputMediaPhoto(media=FSInputFile(src), caption=caption),
+                    InputMediaPhoto(media=FSInputFile(src2)),
+                ]
+
+                await callback.message.answer_media_group(
+                    media=media, disable_notification=True
+                )
         except Exception as e:
             log.exception("Failed to send photo: %s | Error: %s", src, e)
 

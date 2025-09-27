@@ -1,9 +1,10 @@
 from typing import Final
 
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, Message, Contact, FSInputFile
+from aiogram.types import CallbackQuery, Message, FSInputFile
 from aiogram.filters import Command, CommandStart
 
+from config import settings
 from keyboards.inline import instructions_kb, start_kb
 
 
@@ -68,10 +69,10 @@ async def to_sent_contact_support(callback: CallbackQuery) -> None:
         )
     )
     await callback.message.answer_contact(
-        phone_number="+79999999999",
-        first_name="Вася",
-        last_name="Пупкин",
-        vcard="BEGIN:VCARD\nVERSION:3.0\nFN:Вася Пупкин\nTEL:+79999999999\nEND:VCARD",
+        phone_number=settings.support_phone,
+        first_name=settings.support_first_name,
+        last_name=settings.support_last_name,
+        vcard=f"BEGIN:VCARD\nVERSION:3.0\nFN:{settings.support_first_name} {settings.support_last_name}\nTEL:{settings.support_phone}\nEND:VCARD",
         disable_notification=True,
     )
     await callback.answer()
@@ -113,8 +114,8 @@ async def sent_contact_support(message: Message) -> None:
     )
 
     await message.answer_contact(
-        phone_number="+79999999999",
-        first_name="Вася",
-        last_name="Пупкин",
-        vcard="BEGIN:VCARD\nVERSION:3.0\nFN:Вася Пупкин\nTEL:+79999999999\nEND:VCARD",
+        phone_number=settings.support_phone,
+        first_name=settings.support_first_name,
+        last_name=settings.support_last_name,
+        vcard=f"BEGIN:VCARD\nVERSION:3.0\nFN:{settings.support_first_name} {settings.support_last_name}\nTEL:{settings.support_phone}\nEND:VCARD",
     )

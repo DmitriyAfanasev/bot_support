@@ -89,7 +89,7 @@ async def send_support_contact(obj: Message | CallbackQuery) -> None:
 async def handle_start(message: Message) -> None:
     """Обработчик команды /start: приветствие с меню."""
     await message.answer(
-       text="👋 Привет! Это бот-помощник.\n\nВы можете открыть инструкции через кнопки ниже:",
+        text="👋 Привет! Это бот-помощник.\n\nВы можете открыть инструкции через кнопки ниже:",
         reply_markup=start_kb(),
         parse_mode="HTML",
     )

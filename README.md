@@ -213,14 +213,14 @@ services:
 
 2. Запустите сервис:
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
     - `-d`: Запуск в фоновом режиме.
     - `restart: unless-stopped`: Автоматический перезапуск при сбоях.
 
 3. Проверьте статус:
    ```bash
-   docker-compose ps
+   docker compose ps
    ```
 
 ---
@@ -272,6 +272,6 @@ services:
    ```
 2. Пересоберите образ (если используете Docker):
    ```bash
-   docker-compose build
-   docker-compose up -d
+   docker compose build
+   docker compose up -d
    ```

@@ -230,12 +230,11 @@ services:
 ### Структура проекта
 
 - `main.py`: Точка входа основного бота (`aiogram`).
-- `telegram_auto_responder.py`: Скрипт для автоответов (`telethon`).
+- `automatic_responder.py`: Скрипт для автоответов (`telethon`).
 - `handlers/`: Обработчики команд и callback'ов.
 - `instructions_data.py`: Данные инструкций (текст, изображения).
 - `keyboards/`: Inline-клавиатуры.
 - `images/`: Изображения для инструкций.
-- `bot.log`: Логи работы бота и userbot.
 - `.env.template`: Шаблон для `.env`.
 
 ### Добавление новых инструкций

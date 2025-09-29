@@ -11,7 +11,7 @@ PATH_TO_IMAGES = BASE_DIR / "images"
 
 
 class LoggingSettings(BaseModel):
-    log_level: int = logging.INFO
+    log_level: int = logging.WARNING
     log_format: str = (
         "[%(asctime)s] | "
         "%(name)-20s | "
@@ -28,10 +28,10 @@ class Settings(BaseSettings):
     bot_token: SecretStr
     logging: LoggingSettings = LoggingSettings()
 
-    support_url: str
-    support_phone: str
-    support_first_name: str
-    support_last_name: str
+    support_url: str | None
+    support_contact_phone: str | None = None
+    support_contact_first_name: str | None = None
+    support_contact_last_name: str | None = None
 
 
 settings = Settings()

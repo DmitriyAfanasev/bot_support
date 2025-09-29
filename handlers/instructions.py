@@ -1,74 +1,79 @@
 import logging
 
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto
+from aiogram.types import FSInputFile, InputMediaPhoto
+from aiogram.types import CallbackQuery
 
 from keyboards.inline import back_to_menu_kb
-from texts import IMAGES
+from instructions_data import ERROR_INSTRUCTIONS, InstructionStep
 
 router = Router(name=__name__)
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
-async def _send_instruction_text_then_photos(
-    callback: CallbackQuery,
-    text_in_button: str,
-) -> None:
-    for item in IMAGES.get(text_in_button):
-        text = item.get("text", "")
-        src = item.get("src", "")
-        src2 = item.get("src2", "")
-        caption = item.get("caption", "")
-        try:
-            if text:
-                await callback.message.answer(text=text, disable_notification=True)
-            if src and not src2:
-                await callback.message.answer_photo(
-                    FSInputFile(src), caption=caption, disable_notification=True
-                )
-            if src and src2:
-                media = [
-                    InputMediaPhoto(media=FSInputFile(src), caption=caption),
-                    InputMediaPhoto(media=FSInputFile(src2)),
-                ]
+async def _send_text(callback: CallbackQuery, step: InstructionStep) -> None:
+    """Отправляет текст шага (с клавиатурой или без)."""
+    if not step.text:
+        return
+    await callback.message.answer(
+        text=step.text,
+        reply_markup=step.keyboard,
+        disable_notification=True,
+    )
 
-                await callback.message.answer_media_group(
-                    media=media, disable_notification=True
-                )
-        except Exception as e:
-            log.exception("Failed to send photo: %s | Error: %s", src, e)
+
+async def _send_images(callback: CallbackQuery, step: InstructionStep) -> None:
+    """Отправляет одно или несколько изображений."""
+    images = step.image_paths
+    if not images:
+        return
+
+    if len(images) == 1:
+        await callback.message.answer_photo(
+            photo=FSInputFile(images[0]),
+            caption=step.caption or None,
+            disable_notification=True,
+        )
+    else:
+        media = [
+            InputMediaPhoto(
+                media=FSInputFile(path),
+                caption=step.caption or None if i == 0 else None,
+            )
+            for i, path in enumerate(images)
+        ]
+        await callback.message.answer_media_group(
+            media=media, disable_notification=True
+        )
+
+
+async def send_instruction_steps(callback: CallbackQuery) -> None:
+    """Отправляет шаги инструкции (текст/фото) для указанной проблемы и возвращает меню."""
+    steps = ERROR_INSTRUCTIONS.get(callback.data, [])
+
+    for step in steps:
+        await _send_text(callback, step)
+        await _send_images(callback, step)
 
     await callback.message.answer(
-        text="Что делаем дальше?  ⬇️", reply_markup=back_to_menu_kb()
+        text="Что делаем дальше? ⬇️",
+        reply_markup=back_to_menu_kb(),
+        disable_notification=True,
     )
     await callback.answer()
 
 
-@router.callback_query(F.data == "error1")
-async def error1_handler(callback: CallbackQuery):
-    await _send_instruction_text_then_photos(callback, "error1")
+INSTRUCTIONS_MAPPING = {
+    "powerbank_falls_out",
+    "powerbank_not_issued",
+    "station_offline",
+    "deposit_not_unfrozen",
+    "no_indicator",
+    "other_issues",
+}
 
 
-@router.callback_query(F.data == "error2")
-async def error2_handler(callback: CallbackQuery):
-    await _send_instruction_text_then_photos(callback, "error2")
-
-
-@router.callback_query(F.data == "error3")
-async def error3_handler(callback: CallbackQuery):
-    await _send_instruction_text_then_photos(callback, "error3")
-
-
-@router.callback_query(F.data == "error4")
-async def error4_handler(callback: CallbackQuery):
-    await _send_instruction_text_then_photos(callback, "error4")
-
-
-@router.callback_query(F.data == "error5")
-async def error5_handler(callback: CallbackQuery):
-    await _send_instruction_text_then_photos(callback, "error5")
-
-
-@router.callback_query(F.data == "error6")
-async def error6_handler(callback: CallbackQuery):
-    await _send_instruction_text_then_photos(callback, "error6")
+@router.callback_query(F.data.in_(INSTRUCTIONS_MAPPING))
+async def error_handler(callback: CallbackQuery) -> None:
+    """Обработчик для всех инструкций."""
+    await send_instruction_steps(callback)

@@ -75,6 +75,7 @@ def setup_logger(
         console_formatter.converter = time.gmtime  # type: ignore
     console_handler.setFormatter(console_formatter)
 
+    Path("logs").mkdir(parents=True, exist_ok=True)
     if size_rotation_bytes:
         file_handler: logging.Handler = logging.handlers.RotatingFileHandler(
             log_file,
@@ -90,7 +91,7 @@ def setup_logger(
             encoding="utf-8",
             utc=utc_timestamps,
         )
-    file_handler.setLevel(level=logging.DEBUG)
+    file_handler.setLevel(level=logging.WARNING)
     file_formatter = logging.Formatter(base_format, datefmt=datefmt)
     if utc_timestamps:
         file_formatter.converter = time.gmtime  # type: ignore
